@@ -55,46 +55,48 @@ define("tinymce/tableplugin/TableGrid", [
 			gridWidth = 0;
 
 			each(['thead', 'tbody', 'tfoot'], function(part) {
-				var partElm = getChildrenByName(table, part)[0];
-				var rows = getChildrenByName(partElm, 'tr');
 
-				each(rows, function(tr, y) {
-					y += startY;
+				each(getChildrenByName(table, part), function(partElm) {
+					var rows = getChildrenByName(partElm, 'tr');
 
-					each(getChildrenByName(tr, 'td,th'), function(td, x) {
-						var x2, y2, rowspan, colspan;
+					each(rows, function(tr, y) {
+						y += startY;
 
-						// Skip over existing cells produced by rowspan
-						if (grid[y]) {
-							while (grid[y][x]) {
-								x++;
-							}
-						}
+						each(getChildrenByName(tr, 'td,th'), function(td, x) {
+							var x2, y2, rowspan, colspan;
 
-						// Get col/rowspan from cell
-						rowspan = getSpanVal(td, 'rowspan');
-						colspan = getSpanVal(td, 'colspan');
-
-						// Fill out rowspan/colspan right and down
-						for (y2 = y; y2 < y + rowspan; y2++) {
-							if (!grid[y2]) {
-								grid[y2] = [];
+							// Skip over existing cells produced by rowspan
+							if (grid[y]) {
+								while (grid[y][x]) {
+									x++;
+								}
 							}
 
-							for (x2 = x; x2 < x + colspan; x2++) {
-								grid[y2][x2] = {
-									part: part,
-									real: y2 == y && x2 == x,
-									elm: td,
-									rowspan: rowspan,
-									colspan: colspan
-								};
-							}
-						}
+							// Get col/rowspan from cell
+							rowspan = getSpanVal(td, 'rowspan');
+							colspan = getSpanVal(td, 'colspan');
 
-						gridWidth = Math.max(gridWidth, x + 1);
+							// Fill out rowspan/colspan right and down
+							for (y2 = y; y2 < y + rowspan; y2++) {
+								if (!grid[y2]) {
+									grid[y2] = [];
+								}
+
+								for (x2 = x; x2 < x + colspan; x2++) {
+									grid[y2][x2] = {
+										part: part,
+										real: y2 == y && x2 == x,
+										elm: td,
+										rowspan: rowspan,
+										colspan: colspan
+									};
+								}
+							}
+
+							gridWidth = Math.max(gridWidth, x + 1);
+						});
 					});
-				});
+				})
 
 				startY += rows.length;
 			});
